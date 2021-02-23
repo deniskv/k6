@@ -270,6 +270,7 @@ func (car ConstantArrivalRate) Run(parentCtx context.Context, out chan<- stats.S
 		Executor:   car.config.Type,
 		StartTime:  startTime,
 		ProgressFn: progressFn,
+		GetIter:    car.GetScenarioIter,
 	})
 
 	activationParams := getVUActivationParams(maxDurationCtx, car.config.BaseConfig,
@@ -319,7 +320,7 @@ func (car ConstantArrivalRate) Run(parentCtx context.Context, out chan<- stats.S
 		activeVUs <- activateVU(initVU)
 	}
 
-	runIterationBasic := getIterationRunner(car.executionState, car.logger)
+	runIterationBasic := getIterationRunner(car.executionState, car.IncrScenarioIter, car.logger)
 	runIteration := func(vu lib.ActiveVU) {
 		runIterationBasic(maxDurationCtx, vu)
 		activeVUs <- vu
