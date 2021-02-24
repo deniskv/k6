@@ -135,25 +135,25 @@ func TestResponseCallbackInAction(t *testing.T) {
 			expectedSamples: []expectedSample{
 				{
 					tags: map[string]string{
-						"method": "GET",
-						"url":    sr("HTTPBIN_URL/redirect/1"),
-						"name":   sr("HTTPBIN_URL/redirect/1"),
-						"status": "302",
-						"group":  "",
-						"passed": "true",
-						"proto":  "HTTP/1.1",
+						"method":            "GET",
+						"url":               sr("HTTPBIN_URL/redirect/1"),
+						"name":              sr("HTTPBIN_URL/redirect/1"),
+						"status":            "302",
+						"group":             "",
+						"expected_response": "true",
+						"proto":             "HTTP/1.1",
 					},
 					metrics: allHTTPMetrics,
 				},
 				{
 					tags: map[string]string{
-						"method": "GET",
-						"url":    sr("HTTPBIN_URL/get"),
-						"name":   sr("HTTPBIN_URL/get"),
-						"status": "200",
-						"group":  "",
-						"passed": "true",
-						"proto":  "HTTP/1.1",
+						"method":            "GET",
+						"url":               sr("HTTPBIN_URL/get"),
+						"name":              sr("HTTPBIN_URL/get"),
+						"status":            "200",
+						"group":             "",
+						"expected_response": "true",
+						"proto":             "HTTP/1.1",
 					},
 					metrics: allHTTPMetrics,
 				},
@@ -167,25 +167,25 @@ func TestResponseCallbackInAction(t *testing.T) {
 			expectedSamples: []expectedSample{
 				{
 					tags: map[string]string{
-						"method": "GET",
-						"url":    sr("HTTPBIN_URL/redirect/1"),
-						"name":   sr("HTTPBIN_URL/redirect/1"),
-						"status": "302",
-						"group":  "",
-						"passed": "false", // this is on purpose
-						"proto":  "HTTP/1.1",
+						"method":            "GET",
+						"url":               sr("HTTPBIN_URL/redirect/1"),
+						"name":              sr("HTTPBIN_URL/redirect/1"),
+						"status":            "302",
+						"group":             "",
+						"expected_response": "false", // this is on purpose
+						"proto":             "HTTP/1.1",
 					},
 					metrics: allHTTPMetrics,
 				},
 				{
 					tags: map[string]string{
-						"method": "GET",
-						"url":    sr("HTTPBIN_URL/get"),
-						"name":   sr("HTTPBIN_URL/get"),
-						"status": "200",
-						"group":  "",
-						"passed": "true",
-						"proto":  "HTTP/1.1",
+						"method":            "GET",
+						"url":               sr("HTTPBIN_URL/get"),
+						"name":              sr("HTTPBIN_URL/get"),
+						"status":            "200",
+						"group":             "",
+						"expected_response": "true",
+						"proto":             "HTTP/1.1",
 					},
 					metrics: allHTTPMetrics,
 				},
@@ -197,25 +197,25 @@ func TestResponseCallbackInAction(t *testing.T) {
 			expectedSamples: []expectedSample{
 				{
 					tags: map[string]string{
-						"method": "GET",
-						"url":    sr("HTTPBIN_URL/redirect/1"),
-						"name":   sr("HTTPBIN_URL/redirect/1"),
-						"status": "302",
-						"group":  "",
-						"passed": "false", // this is on purpose
-						"proto":  "HTTP/1.1",
+						"method":            "GET",
+						"url":               sr("HTTPBIN_URL/redirect/1"),
+						"name":              sr("HTTPBIN_URL/redirect/1"),
+						"status":            "302",
+						"group":             "",
+						"expected_response": "false", // this is on purpose
+						"proto":             "HTTP/1.1",
 					},
 					metrics: allHTTPMetrics,
 				},
 				{
 					tags: map[string]string{
-						"method": "GET",
-						"url":    sr("HTTPBIN_URL/get"),
-						"name":   sr("HTTPBIN_URL/get"),
-						"status": "200",
-						"group":  "",
-						"passed": "true",
-						"proto":  "HTTP/1.1",
+						"method":            "GET",
+						"url":               sr("HTTPBIN_URL/get"),
+						"name":              sr("HTTPBIN_URL/get"),
+						"status":            "200",
+						"group":             "",
+						"expected_response": "true",
+						"proto":             "HTTP/1.1",
 					},
 					metrics: allHTTPMetrics,
 				},
@@ -322,7 +322,7 @@ func TestResponseCallbackInActionWithoutPassedTag(t *testing.T) {
 		metrics.HTTPReqWaiting,
 		metrics.HTTPReqTLSHandshaking,
 	}
-	deleteSystemTag(state, stats.TagPassed.String())
+	deleteSystemTag(state, stats.TagExpectedResponse.String())
 	httpModule := new(RootModule).NewGlobalModule().NewModuleInstance().(*HTTP)
 	rt.Set("http", common.Bind(rt, httpModule, ctx))
 
@@ -410,14 +410,14 @@ func TestDigestWithResponseCallback(t *testing.T) {
 		"http://HTTPBIN_IP:HTTPBIN_PORT/digest-auth/auth/testuser/testpwd")
 
 	tags := map[string]string{
-		"method":     "GET",
-		"url":        urlRaw,
-		"name":       urlRaw,
-		"status":     "401",
-		"group":      "",
-		"proto":      "HTTP/1.1",
-		"passed":     "true",
-		"error_code": "1401",
+		"method":            "GET",
+		"url":               urlRaw,
+		"name":              urlRaw,
+		"status":            "401",
+		"group":             "",
+		"proto":             "HTTP/1.1",
+		"expected_response": "true",
+		"error_code":        "1401",
 	}
 	assertRequestMetricsEmittedSingle(t, bufSamples[0], tags, allHTTPMetrics, func(sample stats.Sample) {
 		if sample.Metric.Name == metrics.HTTPReqFailed.Name {

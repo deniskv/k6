@@ -7,7 +7,7 @@ import (
 	"fmt"
 )
 
-const _SystemTagSetName = "protosubprotostatusmethodurlnamegroupcheckerrorerror_codetls_versionscenarioservicepasseditervuocsp_statusip"
+const _SystemTagSetName = "protosubprotostatusmethodurlnamegroupcheckerrorerror_codetls_versionscenarioserviceexpected_responseitervuocsp_statusip"
 
 var _SystemTagSetMap = map[SystemTagSet]string{
 	1:      _SystemTagSetName[0:5],
@@ -23,11 +23,11 @@ var _SystemTagSetMap = map[SystemTagSet]string{
 	1024:   _SystemTagSetName[57:68],
 	2048:   _SystemTagSetName[68:76],
 	4096:   _SystemTagSetName[76:83],
-	8192:   _SystemTagSetName[83:89],
-	16384:  _SystemTagSetName[89:93],
-	32768:  _SystemTagSetName[93:95],
-	65536:  _SystemTagSetName[95:106],
-	131072: _SystemTagSetName[106:108],
+	8192:   _SystemTagSetName[83:100],
+	16384:  _SystemTagSetName[100:104],
+	32768:  _SystemTagSetName[104:106],
+	65536:  _SystemTagSetName[106:117],
+	131072: _SystemTagSetName[117:119],
 }
 
 func (i SystemTagSet) String() string {
@@ -53,11 +53,11 @@ var _SystemTagSetNameToValueMap = map[string]SystemTagSet{
 	_SystemTagSetName[57:68]:   1024,
 	_SystemTagSetName[68:76]:   2048,
 	_SystemTagSetName[76:83]:   4096,
-	_SystemTagSetName[83:89]:   8192,
-	_SystemTagSetName[89:93]:   16384,
-	_SystemTagSetName[93:95]:   32768,
-	_SystemTagSetName[95:106]:  65536,
-	_SystemTagSetName[106:108]: 131072,
+	_SystemTagSetName[83:100]:  8192,
+	_SystemTagSetName[100:104]: 16384,
+	_SystemTagSetName[104:106]: 32768,
+	_SystemTagSetName[106:117]: 65536,
+	_SystemTagSetName[117:119]: 131072,
 }
 
 // SystemTagSetString retrieves an enum value from the enum constants string name.
