@@ -23,6 +23,7 @@ package http
 import (
 	"context"
 	"fmt"
+	"sort"
 	"testing"
 
 	"github.com/dop251/goja"
@@ -296,6 +297,123 @@ func TestResponseCallbackInAction(t *testing.T) {
 					}
 				}
 			}
+
+			require.Equal(t, len(testCase.expectedSamples), reqsCount)
+
+			for i, expectedSample := range testCase.expectedSamples {
+				assertRequestMetricsEmittedSingle(t, bufSamples[i], expectedSample.tags, expectedSample.metrics, nil)
+			}
+		})
+	}
+}
+
+func TestResponseCallbackBatch(t *testing.T) {
+	t.Parallel()
+	tb, _, samples, rt, ctx := newRuntime(t)
+	defer tb.Cleanup()
+	sr := tb.Replacer.Replace
+	httpModule := new(RootModule).NewGlobalModule().NewModuleInstance().(*HTTP)
+	rt.Set("http", common.Bind(rt, httpModule, ctx))
+
+	HTTPMetricsWithoutFailed := []*stats.Metric{
+		metrics.HTTPReqs,
+		metrics.HTTPReqBlocked,
+		metrics.HTTPReqConnecting,
+		metrics.HTTPReqDuration,
+		metrics.HTTPReqReceiving,
+		metrics.HTTPReqWaiting,
+		metrics.HTTPReqSending,
+		metrics.HTTPReqTLSHandshaking,
+	}
+
+	allHTTPMetrics := append(HTTPMetricsWithoutFailed, metrics.HTTPReqFailed)
+	// IMPORTANT: the tests here depend on the fact that the url they hit can be ordered in the same
+	// order as the expectedSamples even if they are made concurrently
+	testCases := map[string]struct {
+		code            string
+		expectedSamples []expectedSample
+	}{
+		"basic": {
+			code: `
+	http.batch([["GET", "HTTPBIN_URL/status/200", null, {responseCallback: null}],
+			["GET", "HTTPBIN_URL/status/201"],
+			["GET", "HTTPBIN_URL/status/202", null, {responseCallback: http.expectedStatuses(4)}],
+			["GET", "HTTPBIN_URL/status/405", null, {responseCallback: http.expectedStatuses(405)}],
+	]);`,
+			expectedSamples: []expectedSample{
+				{
+					tags: map[string]string{
+						"method": "GET",
+						"url":    sr("HTTPBIN_URL/status/200"),
+						"name":   sr("HTTPBIN_URL/status/200"),
+						"status": "200",
+						"group":  "",
+						"proto":  "HTTP/1.1",
+					},
+					metrics: HTTPMetricsWithoutFailed,
+				},
+				{
+					tags: map[string]string{
+						"method":            "GET",
+						"url":               sr("HTTPBIN_URL/status/201"),
+						"name":              sr("HTTPBIN_URL/status/201"),
+						"status":            "201",
+						"group":             "",
+						"expected_response": "true",
+						"proto":             "HTTP/1.1",
+					},
+					metrics: allHTTPMetrics,
+				},
+				{
+					tags: map[string]string{
+						"method":            "GET",
+						"url":               sr("HTTPBIN_URL/status/202"),
+						"name":              sr("HTTPBIN_URL/status/202"),
+						"status":            "202",
+						"group":             "",
+						"expected_response": "false",
+						"proto":             "HTTP/1.1",
+					},
+					metrics: allHTTPMetrics,
+				},
+				{
+					tags: map[string]string{
+						"method":            "GET",
+						"url":               sr("HTTPBIN_URL/status/405"),
+						"name":              sr("HTTPBIN_URL/status/405"),
+						"status":            "405",
+						"error_code":        "1405",
+						"group":             "",
+						"expected_response": "true",
+						"proto":             "HTTP/1.1",
+					},
+					metrics: allHTTPMetrics,
+				},
+			},
+		},
+	}
+	for name, testCase := range testCases {
+		testCase := testCase
+		t.Run(name, func(t *testing.T) {
+			httpModule.responseCallback = defaultExpectedStatuses.match
+
+			_, err := rt.RunString(sr(testCase.code))
+			assert.NoError(t, err)
+			bufSamples := stats.GetBufferedSamples(samples)
+
+			reqsCount := 0
+			for _, container := range bufSamples {
+				for _, sample := range container.GetSamples() {
+					if sample.Metric.Name == "http_reqs" {
+						reqsCount++
+					}
+				}
+			}
+			sort.Slice(bufSamples, func(i, j int) bool {
+				iURL, _ := bufSamples[i].GetSamples()[0].Tags.Get("url")
+				jURL, _ := bufSamples[j].GetSamples()[0].Tags.Get("url")
+				return iURL < jURL
+			})
 
 			require.Equal(t, len(testCase.expectedSamples), reqsCount)
 
