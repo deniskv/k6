@@ -175,9 +175,7 @@ func (t *transport) measureAndEmitMetrics(unfReq *unfinishedRequest) *finishedRe
 			statusCode = unfReq.response.StatusCode
 		}
 		expected := t.responseCallback(statusCode)
-		if expected {
-			failed = 0
-		} else {
+		if !expected {
 			failed = 1
 		}
 
