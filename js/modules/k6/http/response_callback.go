@@ -68,36 +68,35 @@ func (*HTTP) ExpectedStatuses(ctx context.Context, args ...goja.Value) *expected
 	}
 	var result expectedStatuses
 
+	jsIsInt, _ := goja.AssertFunction(rt.GlobalObject().Get("Number").ToObject(rt).Get("isInteger"))
+	isInt := func(a goja.Value) bool {
+		v, err := jsIsInt(goja.Undefined(), a)
+		return err == nil && v.ToBoolean()
+	}
+
+	errMsg := "argument number %d to expectedStatuses was neither an integer nor an object like {min:100, max:329}"
 	for i, arg := range args {
 		o := arg.ToObject(rt)
 		if o == nil {
-			//nolint:lll
-			common.Throw(rt, fmt.Errorf("argument number %d to expectedStatuses was neither an integer nor an object like {min:100, max:329}", i+1))
+			common.Throw(rt, fmt.Errorf(errMsg, i+1))
 		}
 
-		if checkNumber(arg, rt) {
+		if isInt(arg) {
 			result.exact = append(result.exact, int(o.ToInteger()))
 		} else {
 			min := o.Get("min")
 			max := o.Get("max")
 			if min == nil || max == nil {
-				//nolint:lll
-				common.Throw(rt, fmt.Errorf("argument number %d to expectedStatuses was neither an integer nor an object like {min:100, max:329}", i+1))
+				common.Throw(rt, fmt.Errorf(errMsg, i+1))
 			}
-			if !(checkNumber(min, rt) && checkNumber(max, rt)) {
-				common.Throw(rt, fmt.Errorf("both min and max need to be number for argument number %d", i+1))
+			if !(isInt(min) && isInt(max)) {
+				common.Throw(rt, fmt.Errorf("both min and max need to be integers for argument number %d", i+1))
 			}
 
 			result.minmax = append(result.minmax, [2]int{int(min.ToInteger()), int(max.ToInteger())})
 		}
 	}
 	return &result
-}
-
-func checkNumber(a goja.Value, rt *goja.Runtime) bool {
-	c, _ := goja.AssertFunction(rt.GlobalObject().Get("Number").ToObject(rt).Get("isInteger"))
-	v, err := c(goja.Undefined(), a)
-	return err == nil && v.ToBoolean()
 }
 
 // SetResponseCallback sets the responseCallback to the value provided. Supported values are
