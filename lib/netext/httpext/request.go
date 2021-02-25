@@ -285,7 +285,8 @@ func MakeRequest(ctx context.Context, preq *ParsedHTTPRequest) (*Response, error
 			originalResponseCallback := tracerTransport.responseCallback
 			tracerTransport.responseCallback = func(status int) bool {
 				tracerTransport.responseCallback = originalResponseCallback
-				return status == 401
+				// ntlm is connection-level based so we could've already authorized the connection and to now reuse it
+				return status == 401 || originalResponseCallback(status)
 			}
 		}
 		transport = ntlmssp.Negotiator{RoundTripper: transport}
