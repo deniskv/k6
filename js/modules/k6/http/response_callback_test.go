@@ -63,7 +63,7 @@ func TestExpectedStatuses(t *testing.T) {
 
 		"string max status code": {
 			code: `(http.expectedStatuses(200, 300, {min: 200, max:"300"}))`,
-			err:  "both min and max need to be number for argument number 3",
+			err:  "both min and max need to be integers for argument number 3",
 		},
 		"float status code": {
 			err:  "argument number 2 to expectedStatuses was neither an integer nor an object like {min:100, max:329}",
@@ -71,7 +71,7 @@ func TestExpectedStatuses(t *testing.T) {
 		},
 
 		"float max status code": {
-			err:  "both min and max need to be number for argument number 3",
+			err:  "both min and max need to be integers for argument number 3",
 			code: `(http.expectedStatuses(200, 300, {min: 200, max:300.5}))`,
 		},
 		"no arguments": {
