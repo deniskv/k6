@@ -39,17 +39,17 @@ var defaultExpectedStatuses = expectedStatuses{
 // it except using ExpectedStatuses
 type expectedStatuses struct {
 	minmax [][2]int
-	exact  []int // this can be done with the above and vice versa
+	exact  []int
 }
 
 func (e expectedStatuses) match(status int) bool {
-	for _, v := range e.exact { // binary search
+	for _, v := range e.exact {
 		if v == status {
 			return true
 		}
 	}
 
-	for _, v := range e.minmax { // binary search
+	for _, v := range e.minmax {
 		if v[0] <= status && status <= v[1] {
 			return true
 		}
