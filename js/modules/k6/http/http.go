@@ -49,7 +49,7 @@ var ErrJarForbiddenInInitContext = common.NewInitContextError("Making cookie jar
 // RootModule is only used to be registered and then to create a global (per k6 instance) module instance
 type RootModule struct{}
 
-// NewGlobalModule return a new GlobalHTTP
+// NewGlobalModule returns a new GlobalHTTP
 func (r RootModule) NewGlobalModule() interface{ NewModuleInstance() interface{} } {
 	return &GlobalHTTP{}
 }
